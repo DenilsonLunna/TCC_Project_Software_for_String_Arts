@@ -2,8 +2,9 @@ import cv2
 import numpy as np
 from math import sin, cos, radians
 from random import randint
+import copy 
 
-nailsQuantity = 210
+
 
 def transformImageInBlackAndGray(imagem):
     return cv2.cvtColor(imagem, cv2.COLOR_BGR2GRAY)
@@ -23,13 +24,16 @@ def printImage(image, time):
 
 
 def createCanvas(image):
-    canvas = image
+    canvas = copy.copy(image)
     for i in range(image.shape[0]):
         for j in range(image.shape[1]):
             canvas[i, j] = 255
     return canvas
 
-positionsNails = []
+
+
+
+
 def nailsCreate(image, nailsQuantity):
     size = image.shape
     center = [int(size[1] / 2), int(size[0] / 2)]
@@ -37,10 +41,12 @@ def nailsCreate(image, nailsQuantity):
     for i in range(0, nailsQuantity):
         x = int(center[0] + ((center[0] - 1) * sin(-(radians(angle * i)))))
         y = int(center[1] + ((center[0] - 1) * cos(-(radians(angle * i)))))
-        #image.itemset((y, x), 0) 
+        # image.itemset((y, x), 0)
         image[y:y+3, x: x+3] = 0
-        positionsNails.append([x,y]) 
+        nail_positions.append([x, y])
     return image
+
+
 def pixels_analysis(point_1, point_2, im):
     yd = point_2[0] - point_1[0]
     xd = point_2[1] - point_1[1]
@@ -59,25 +65,60 @@ def pixels_analysis(point_1, point_2, im):
         if color == 0:
             black_pixels += 1
     return [black_pixels, point_1, point_2]
+
+def editImage(imagem):
+    imagem = transformImageInBlackAndGray(imagem)
+    imagem = putFilterBlackWhite(imagem, 127)
+    return imagem
+
+def algorithmWeaver():
+    actual_point = nail_positions[0]
+    segments = [0]
+    lines = 0
+    while True:
+        bigger = [0, nail_positions[0], nail_positions[0]]
+        for i in range(0, nailsQuantity):
+            point_analysis = nail_positions[i]
+            a = pixels_analysis(actual_point, point_analysis, img)
+            if a[0] > bigger[0]:
+                bigger = [a[0], a[1], a[2]]
+        actual_point = bigger[2]
+        line = [bigger[1], bigger[2]]
+        index = nail_positions.index(bigger[2])
+        segments.append(index)
+        cv2.line(img, (line[1][0], line[1][1]), (line[0][0], line[0][1]), (255, 255, 255), 1)
+        cv2.line(canvas, (line[1][0], line[1][1]), (line[0][0], line[0][1]), (0, 0, 0), 1)
+        image_output_1 = cv2.resize(img, (700, 700))
+        image_output_2 = cv2.resize(canvas, (700, 700))
+        cv2.imshow('output_1', image_output_1)
+        cv2.imshow('output_2', image_output_2)
+        k = cv2.waitKey(1)
+        if(k == 27):
+            break
+        lines += 1
+        if bigger[0] == 0 or lines == 1800:
+            break
+        
+        
 # ===================================================== MAIN ============================================
-imagem = cv2.imread("rosto01.jpg", 1)
-img = transformImageInBlackAndGray(imagem)
-img = putFilterBlackWhite(img, 127)
+imagemName = "Homem.png"
+imagem = cv2.imread(imagemName, 1)
+img = editImage(imagem)
+printImage(img,3000)
+nail_positions = []
+nailsQuantity = 210
+canvas = createCanvas(img)
+canvas = nailsCreate(canvas,nailsQuantity)
+img = nailsCreate(img, nailsQuantity)
 
-#canvas = createCanvas(img)
-#canvas = nailsCreate(canvas,210)
-img = nailsCreate(img,nailsQuantity)
 
 
-v = 1
+algorithmWeaver()
 
-for i in range(0,nailsQuantity):
-    actualPoint = positionsNails[randint(0,len(positionsNails)-1)]
-    finalPoint = positionsNails[randint(0,len(positionsNails)-1)]
-    cv2.line(img, (actualPoint[0],actualPoint[1]), (finalPoint[0],finalPoint[1]), 0,1)
-    a = pixels_analysis(actualPoint,finalPoint, img)
-    print(a)
-    v = printImage(img,100)
-    if(v == -1):
-        break
+    
+cv2.imwrite("StringArt_{}".format(imagemName),canvas)
+    
+    
+            
+    
         

@@ -70,12 +70,12 @@ def pixels_analysis(point_1, point_2, im):
             black_pixels += 1
     return [black_pixels, point_1, point_2]
 
-def editImage(imagem):
+def editImage(imagem, limiar):
     imagem = transformImageInBlackAndGray(imagem)
-    imagem = putFilterBlackWhite(imagem, 127)
+    imagem = putFilterBlackWhite(imagem, limiar)
     return imagem
 
-def algorithmWeaver():
+def algorithmWeaver(lineQtd):
     actual_point = nail_positions[0]
     segments = [0]
     lines = 0
@@ -86,7 +86,7 @@ def algorithmWeaver():
         for i in range(0, nailsQuantity):
             point_analysis = nail_positions[i]
             a = pixels_analysis(actual_point, point_analysis, img)
-            if a[0] > bigger[0]:
+            if a[0] > bigger[0]: #a quantidade de pixels dessa linha é maior do que a maior atual? 
                 bigger = [a[0], a[1], a[2]]
         actual_point = bigger[2]
         line = [bigger[1], bigger[2]]
@@ -116,7 +116,7 @@ def algorithmWeaver():
         if(k == 27):
             break
         lines += 1
-        if bigger[0] == 0 or lines == 2500:
+        if bigger[0] == 0 or lines == lineQtd:
             break
         
 def cutImage(imagem):
@@ -148,7 +148,7 @@ def cutImage(imagem):
 imagemPath = filedialog.askopenfilename()
 imagem = cv2.imread(imagemPath, 1)
 
-img = editImage(imagem)
+img = editImage(imagem,80)
 
 
 img = cutImage(img)
@@ -160,7 +160,7 @@ img = nailsCreate(img, nailsQuantity)
 cv2.imwrite("etapaNails.png",img)
 
 
-algorithmWeaver()
+algorithmWeaver(2500)
 
 fileSeparated = imagemPath.split("/")
 nameFile = fileSeparated[len(fileSeparated) - 1]

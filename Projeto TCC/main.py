@@ -160,11 +160,11 @@ img = nailsCreate(img, nailsQuantity)
 cv2.imwrite("etapaNails.png",img)
 
 
-algorithmWeaver(2500)
+algorithmWeaver(25)
 
 fileSeparated = imagemPath.split("/")
 nameFile = fileSeparated[len(fileSeparated) - 1]
-#cv2.imwrite("StringArt_{}".format(nameFile),canvas)
+cv2.imwrite("StringArt_{}".format(nameFile),canvas)
     
     
             

@@ -160,7 +160,7 @@ img = nailsCreate(img, nailsQuantity)
 cv2.imwrite("etapaNails.png",img)
 
 
-algorithmWeaver(25)
+algorithmWeaver(2500)
 
 fileSeparated = imagemPath.split("/")
 nameFile = fileSeparated[len(fileSeparated) - 1]

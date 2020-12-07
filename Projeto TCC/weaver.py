@@ -50,7 +50,7 @@ clean_image()
 size = image.shape
 # (Y,X)
 center = [int(size[1] / 2), int(size[0] / 2)]
-nail_number = int(input('nails number: '))
+nail_number = 200
 angle = 360 / nail_number
 nail_positions = []
 for i in range(0, nail_number):

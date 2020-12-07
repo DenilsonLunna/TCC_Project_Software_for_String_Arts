@@ -153,7 +153,7 @@ def cutImage(imagem):
 # ===================================================== MAIN ============================================
 
 tela = app.TelaPython()
-img = tela.iniciar()
+[img, imagemPath] = tela.iniciar()
 
 
 

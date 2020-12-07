@@ -30,7 +30,7 @@ class TelaPython():
         layout = [
           
             [sg.Text("Limiar Value: ", key="text")],
-            [sg.Slider(range=(0,255),default_value = 0, orientation='h', key="sliderLimiar",change_submits=True)],
+            [sg.Slider(range=(0,255),default_value = 80, orientation='h', key="sliderLimiar",change_submits=True)],
             [sg.Image(filename='', key='image')],
             [sg.Button('OK')]
             
@@ -44,7 +44,9 @@ class TelaPython():
         imagemPath = filedialog.askopenfilename()
         imagem = cv2.imread(imagemPath, 1)
         imagemBG = transformImageInBlackAndGray(imagem)
-    
+        imagem = cv2.threshold(imagemBG,80, 255, cv2.THRESH_BINARY)[1]
+        imgbytes = cv2.imencode('.png', imagem)[1].tobytes()  # ditto 
+        self.janela["image"].update(data=imgbytes)
         while True: 
             self.events,self.values = self.janela.Read()
            
@@ -58,7 +60,7 @@ class TelaPython():
                 self.janela["image"].update(data=imgbytes)
                
             if(self.events == 'OK'):
-                return imagem
+                return [imagem, imagemPath]
                
                 
                 

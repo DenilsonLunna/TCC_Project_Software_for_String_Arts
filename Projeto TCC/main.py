@@ -1,19 +1,13 @@
+
 import cv2
 import numpy as np
 from tkinter import filedialog
 from math import sin, cos, radians
 from random import randint
 import copy 
+from telas import app
+import random
 
-
-
-def transformImageInBlackAndGray(imagem):
-    return cv2.cvtColor(imagem, cv2.COLOR_BGR2GRAY)
-
-
-def putFilterBlackWhite(imagem, limiar):
-    ret, imgT = cv2.threshold(imagem, limiar, 255, cv2.THRESH_BINARY)
-    return imgT
 
 
 def printImage(image, time):
@@ -68,12 +62,9 @@ def pixels_analysis(point_1, point_2, im):
         color = im.item(pxp[0], pxp[1])
         if color == 0:
             black_pixels += 1
+    
     return [black_pixels, point_1, point_2]
 
-def editImage(imagem, limiar):
-    imagem = transformImageInBlackAndGray(imagem)
-    imagem = putFilterBlackWhite(imagem, limiar)
-    return imagem
 
 def algorithmWeaver(lineQtd):
     actual_point = nail_positions[0]
@@ -81,11 +72,13 @@ def algorithmWeaver(lineQtd):
     lines = 0
     cont1 = 0
     cont2 = 0
+    
     while True:
         bigger = [0, nail_positions[0], nail_positions[0]]
+    
         for i in range(0, nailsQuantity):
-            point_analysis = nail_positions[i]
-            a = pixels_analysis(actual_point, point_analysis, img)
+            point_analysis = nail_positions[i] #ponto que vou analisar apartir do pino atual
+            a = pixels_analysis(actual_point, point_analysis, img) # a = [qtdBlackPixels, Point1, Point2]
             if a[0] > bigger[0]: #a quantidade de pixels dessa linha é maior do que a maior atual? 
                 bigger = [a[0], a[1], a[2]]
         actual_point = bigger[2]
@@ -138,22 +131,20 @@ def cutImage(imagem):
     tam = smaller*2
     
     crop = imagem[initialPoint:tam,initialPoint:tam]
-    crop = cv2.resize(crop,(1000,1000))
+    crop = cv2.resize(crop,(700,700))
     return crop
     
     
     
     
 # ===================================================== MAIN ============================================
-imagemPath = filedialog.askopenfilename()
-imagem = cv2.imread(imagemPath, 1)
-
-img = editImage(imagem,80)
+tela = app.TelaPython()
+[img, imagemPath] = tela.iniciar()
 
 
 img = cutImage(img)
 nail_positions = []
-nailsQuantity = 210
+nailsQuantity = 256
 canvas = createCanvas(img)
 canvas = nailsCreate(canvas,nailsQuantity)
 img = nailsCreate(img, nailsQuantity)
@@ -164,7 +155,7 @@ algorithmWeaver(2500)
 
 fileSeparated = imagemPath.split("/")
 nameFile = fileSeparated[len(fileSeparated) - 1]
-cv2.imwrite("StringArt_{}".format(nameFile),canvas)
+cv2.imwrite("3StringArt_{}".format(nameFile),canvas)
     
     
             

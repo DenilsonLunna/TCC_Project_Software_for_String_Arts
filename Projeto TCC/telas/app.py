@@ -3,6 +3,19 @@ from tkinter import filedialog
 import cv2
 
 
+
+def cutImage(img, initial):
+    w = img.shape[0]
+    h = img.shape[1]
+    
+    if(h > w):
+        img = img[0:initial+w,initial:initial+w]
+    else:
+        img = img[initial:initial+h,0:initial+h]
+    
+    return img
+    
+
 def printImage(image, time):
     cv2.imshow("imagem", image)
     key = cv2.waitKey(time)
@@ -28,10 +41,15 @@ class TelaPython():
     def __init__(self):
         #Layout
         layout = [
-          
-            [sg.Text("Limiar Value: ", key="text")],
-            [sg.Slider(range=(0,255),default_value = 80, orientation='h', key="sliderLimiar",change_submits=True)],
+            [sg.Button('Load image', key="loadImage")],
+            
+            [sg.Text("Limiar Value: ", key="textLimiar", visible=False), 
+             sg.Slider(range=(0,255),default_value = 80, orientation='h', key="sliderLimiar",change_submits=True, visible=False)],
+            
+            [sg.Slider(range=(0,255),default_value =0, orientation='h', key="sliderCutWidth",change_submits=True, visible=False)],
+           
             [sg.Image(filename='', key='image')],
+            
             [sg.Button('OK')]
             
         ]
@@ -39,32 +57,45 @@ class TelaPython():
         self.janela = sg.Window('String art', layout, finalize=True)
         
             
-        
     def iniciar(self):
-        imagemPath = filedialog.askopenfilename()
-        imagem = cv2.imread(imagemPath, 1)
-        imagemBG = transformImageInBlackAndGray(imagem)
-        imagem = cv2.threshold(imagemBG,80, 255, cv2.THRESH_BINARY)[1]
-        imgbytes = cv2.imencode('.png', imagem)[1].tobytes()  # ditto 
-        self.janela["image"].update(data=imgbytes)
+        
         while True: 
             self.events,self.values = self.janela.Read()
-           
+            if(self.events== "loadImage"):
+                imagemPath = filedialog.askopenfilename()
+                imagem = cv2.imread(imagemPath, 1)
+                #logica para corte da imagem
+                
+                
+                self.janela["textLimiar"].update(visible=True)
+                self.janela["sliderLimiar"].update(visible=True)
+                self.janela["sliderCutWidth"].update(visible=True)
+                
+                imagemCrop = cutImage(imagem,0)
+                imagemBG = transformImageInBlackAndGray(imagem)
+                imagem = putFilterBlackWhite(imagemBG, self.values["sliderLimiar"])
+                imgbytes = cv2.imencode('.png', imagemBG)[1].tobytes()  # ditto 
+                self.janela["image"].update(data=imgbytes)
              
             if(self.events == sg.WINDOW_CLOSED):
                 break
             
             if(self.events == 'sliderLimiar'):
-                imagem = cv2.threshold(imagemBG,self.values["sliderLimiar"], 255, cv2.THRESH_BINARY)[1]
-                imgbytes = cv2.imencode('.png', imagem)[1].tobytes()  # ditto 
-                self.janela["image"].update(data=imgbytes)
-               
+                imagem = putFilterBlackWhite(imagemBG, self.values["sliderLimiar"])
+                imagem = cutImage(imagem,int(self.values["sliderCutWidth"]))
+                
             if(self.events == 'OK'):
                 return [imagem, imagemPath]
                
+            if(self.events == "sliderCutWidth"):
+                imagem = putFilterBlackWhite(imagemBG, self.values["sliderLimiar"])
+                imagem = cutImage(imagem,int(self.values["sliderCutWidth"]))
                 
-                
-                
+          
+            
+            imgbytes = cv2.imencode('.png', imagem)[1].tobytes()  # ditto 
+            self.janela["image"].update(data=imgbytes)  
+              
             
             
                 
@@ -79,5 +110,8 @@ def qtdBlack(image):
             if(image.item(i,y) == 0):
                 qtd += 1
     return qtd
-    
+
+#tela = TelaPython()
+#tela.iniciar()
+
 print("done")

@@ -38,9 +38,9 @@ def nailsCreate(image, nailsQuantity):
         y = int(center[1] + ((center[0] - 1) * cos(-(radians(angle * i)))))
         # image.itemset((y, x), 0)
         if(image[y,x] == 0):
-            image[y:y+5, x: x+5] = 255 #adicionando ponto na imagem no tamanho 3x3 pixels
+            image[y:y+1, x: x+1] = 255 #adicionando ponto na imagem no tamanho 1x1 pixels
         else:
-            image[y:y+5, x: x+5] = 0 #adicionando ponto na imagem no tamanho 3x3 pixels
+            image[y:y+1, x: x+1] = 0 #adicionando ponto na imagem no tamanho 1x1 pixels
         nail_positions.append([x, y])
     return image
 

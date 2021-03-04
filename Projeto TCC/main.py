@@ -86,9 +86,9 @@ def algorithmWeaver(lineQtd):
         index = nail_positions.index(bigger[2])
         segments.append(index)
         cv2.line(img, (line[1][0], line[1][1]), (line[0][0], line[0][1]), (255, 255, 255), 1)
-        cv2.line(canvas, (line[1][0], line[1][1]), (line[0][0], line[0][1]), (0, 0, 0), 1)
-        image_output_1 = cv2.resize(img, (700, 700))
-        image_output_2 = cv2.resize(canvas, (700, 700))
+        cv2.line(canvas, (line[1][0], line[1][1]), (line[0][0], line[0][1]), (20, 20, 20), 1)
+        image_output_1 = cv2.resize(img, (400, 400))
+        image_output_2 = cv2.resize(canvas, (400, 400))
         
         #essa parte comentada é para criar as imagens no decorrer do processo, ele vai salvar imagens com multiplos de 20 e multiplos de 250
         #usei para gerar uma imagem não apague pois posso precisar de novo
@@ -110,6 +110,7 @@ def algorithmWeaver(lineQtd):
             break
         lines += 1
         if bigger[0] == 0 or lines == lineQtd:
+            return segments
             break
         
 def cutImage(imagem):
@@ -136,25 +137,41 @@ def cutImage(imagem):
     
     
     
+def gerarArquivo(listaCaminhos, qtdLigacoes, nomeImagem):
+    file = open("caminhos_{}".format(nomeImagem),'w+')
     
+    file.write("Em baixo esta as ligacoes necessarias para gerar a imagem: {}, Quantidade de Ligacoes: {} \n \n".format(nomeImagem, qtdLigacoes))
+    file.write("Cada linha possui 10 ligacoes, para nao se perder voce pode parar no final de cada linha e ir marcando. \n \n")
+    file.write("No final do projeto voce pode adicionar mais linhas a gosto, use a criatividade. \n \n")
+    file.write("LIGACOES\n \n")
+    for i in range(len(segments)):
+        if(i % 10 == 0):
+            file.write("\n")
+        file.write("{} - ".format(segments[i]))
+    
+    
+        
+        
 # ===================================================== MAIN ============================================
 tela = app.TelaPython()
-[img, imagemPath] = tela.iniciar()
-
+[img, imagemPath, pinosQtd] = tela.iniciar()
 
 img = cutImage(img)
 nail_positions = []
-nailsQuantity = 256
+nailsQuantity = 250
+if(int(pinosQtd) > 0):   
+    nailsQuantity = int(pinosQtd)
 canvas = createCanvas(img)
 canvas = nailsCreate(canvas,nailsQuantity)
 img = nailsCreate(img, nailsQuantity)
 cv2.imwrite("etapaNails.png",img)
 
-
-algorithmWeaver(2500)
+qtdLigacoes = 2500
+segments = algorithmWeaver(qtdLigacoes)
 
 fileSeparated = imagemPath.split("/")
 nameFile = fileSeparated[len(fileSeparated) - 1]
+gerarArquivo(segments, qtdLigacoes, nameFile)
 cv2.imwrite("3StringArt_{}".format(nameFile),canvas)
     
     

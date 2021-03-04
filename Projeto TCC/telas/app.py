@@ -40,6 +40,7 @@ def transformImageInBlackAndGray(imagem):
 def putFilterBlackWhite(imagem, limiar):
     ret,imgT = cv2.threshold(imagem, limiar, 255, cv2.THRESH_BINARY)
     return imgT
+    
 
 def editImage(imagem, limiar):
     imagem = transformImageInBlackAndGray(imagem)
@@ -50,19 +51,20 @@ class TelaPython():
     def __init__(self):
         #Layout
         layout = [
-            [sg.Button('Load image', key="loadImage")],
-            
-            [sg.Text("Limiar Value: ", key="textLimiar", visible=False), sg.Text("W = 10000 H = 10000", key="textSizeImage", visible=False,font = 'arial')], 
-            [sg.Slider(range=(0,255),default_value = 80, orientation='h', key="sliderLimiar",change_submits=True, visible=False)],
-            [sg.Text("Adjust Image: ", visible=True)], [sg.Slider(range=(0,255),default_value =0, orientation='h', key="sliderCutWidth",change_submits=True, visible=False)],  
+            [sg.Text("Escolha uma imagem quadrada de preferencia")],
+            [sg.Button('Load image', key="loadImage")],  
+            [sg.Text("W = 10000 H = 10000", key="textSizeImage",font = 'arial')], 
+            [sg.Text("Pinos: ", key="pinos"),sg.Input(size=(10,0), key="pinosQtd", default_text="250")], 
+            [sg.Text("Limiar: ", key="textLimiar"),sg.Slider(range=(0,255),default_value = 80, orientation='h', key="sliderLimiar",change_submits=True)],
+            [sg.Text("Adjust: ", key="adjustImage"), sg.Slider(range=(0,255),default_value =0, orientation='h', key="sliderCutWidth",change_submits=True)],  
             [sg.Image(filename='', key='image')],   
             [sg.Button('OK')]
             
         ]
         #Janela
-        self.janela = sg.Window('String art', layout, finalize=True)
+        self.janela = sg.Window('String art', finalize=True).layout(layout)
         
-            
+                
     def iniciar(self):
         
         while True: 
@@ -77,8 +79,9 @@ class TelaPython():
                 self.janela["sliderLimiar"].update(visible=True)
                 self.janela["sliderCutWidth"].update(visible=True)
                 self.janela["textSizeImage"].update(visible=True)
+                self.janela["adjustImage"].update(visible=True)
+                self.janela["sliderCutWidth"].update(range=(0, abs(imagem.shape[0]-imagem.shape[1])))
                 
-               
                 text = "W = {} H = {}".format(imagem.shape[1],imagem.shape[0])
                 self.janela["textSizeImage"].update(value = text)
                 
@@ -87,18 +90,21 @@ class TelaPython():
                 
                 imagem = putFilterBlackWhite(imagemBG, self.values["sliderLimiar"])
                 imagem = cutImage(imagem,getBiggerSize(imagem))
-                imagem = cv2.resize(imagem, (500,500))
+                imagem = cv2.resize(imagem, (500,500), 1.5,1.5,interpolation = cv2.INTER_CUBIC )
                 
                 #Essa parte é pra resolver um bug
                 imagem = putFilterBlackWhite(imagemBG, self.values["sliderLimiar"])
                 imagem = cutImage(imagem,int(self.values["sliderCutWidth"]+1)) 
-                imagem = cv2.resize(imagem, (500,500)) 
+                imagem = cv2.resize(imagem, (500,500), 1.5,1.5,interpolation = cv2.INTER_CUBIC) 
                  
                 imgbytes = cv2.imencode('.png', imagemBG)[1].tobytes()  # ditto 
                 self.janela["image"].update(data=imgbytes)
                 
                 
-             
+            if (self.events == '-GRAPH-'):
+                if mouse == (None, None):
+                    continue 
+                print(mouse[0], mouse[1])
             if(self.events == sg.WINDOW_CLOSED):
                 break
             
@@ -108,7 +114,7 @@ class TelaPython():
                 imagem = cv2.resize(imagem, (500,500))  
                 
             if(self.events == 'OK'):
-                return [imagem, imagemPath]
+                return [imagem, imagemPath,self.values["pinosQtd"]]
                
             if(self.events == "sliderCutWidth"):
                 imagem = putFilterBlackWhite(imagemBG, self.values["sliderLimiar"])
@@ -133,7 +139,7 @@ def qtdBlack(image):
                 qtd += 1
     return qtd
 
-tela = TelaPython()
-tela.iniciar()
+#tela = TelaPython()
+#tela.iniciar()
 
 print("done")
